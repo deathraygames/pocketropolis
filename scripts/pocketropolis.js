@@ -38,8 +38,22 @@ RocketBoots.ready(function(){
 	});
 	var curr = g.currencies = g.incrementer.currencies;
 	var planet = g.planet = new Planet({size: 1000, radius: 1000});
-	var city = g.city2 = new City({}, 0, 4);
-	
+	var city = g.city = new City({startPlotIndex: 0, endPlotIndex: 4});
+	var permits = g.permits = [];
+	var requests = g.requests = [];
+
+	// Add random buildings just for testing
+	// TODO: remove this
+	planet.plots.forEach(function(plot){
+		var building = plot.buildBuilding({name: "Random Building"});
+		if (building) {
+			plot.buildFloor();
+			if (Math.random() > 0.5) { plot.buildFloor(); }
+			if (Math.random() > 0.5) { plot.buildFloor(); }
+			if (Math.random() > 0.5) { plot.buildFloor(); }
+		}
+	});
+
 
 
 	g.incrementer.addCurrencies([
@@ -85,7 +99,7 @@ RocketBoots.ready(function(){
 
 
 //==================================================================== OLD GAME
-
+/*
 	//======================================== Tools
 
 	function cloneObject (obj) { 
@@ -290,14 +304,6 @@ RocketBoots.ready(function(){
 				g.state.transition("stats");
 			}
 		},
-		/*
-		"view": {
-			"text": 	"View",
-			"action": 	function() {
-				g.changeFocus(1);
-			}
-		},
-		*/
 		"left": {
 			"text": 	"Left",
 			"action": 	function () {
@@ -321,15 +327,7 @@ RocketBoots.ready(function(){
 			"action": 	function() {
 				g.state.transition("demolish");
 			}
-		},		
-		/*
-		"configure": {
-			"text": 	"Configure",
-			"action": 	function() {
-				g.state.transition("configure");
-			}
 		},
-		*/
 		"science": {
 			"text": 	"Science",
 			"action": 	function() {
@@ -1024,5 +1022,6 @@ RocketBoots.ready(function(){
 	g.gameLoop.start();
 
 	$('body > footer').fadeIn();
+*/
 
 });
