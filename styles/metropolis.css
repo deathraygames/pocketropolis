@@ -1,0 +1,296 @@
+body {
+	font-family: Arial, sans-serif;
+	font-size: 16px;
+	background: #222;
+	text-align: center;
+}
+a {
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+button {
+	cursor: pointer;
+}
+button:focus {
+	outline: 0;
+	border-color: white;
+}
+
+
+.gametoy {
+	width: 760px;
+	min-height: 200px;
+	margin: 0.5em auto;
+	padding: 20px;
+	background-color: #C0C1C6;
+	border-radius: 20px;
+	box-shadow: 0 1em 1em rgba(0,0,0,0.5),
+		0 1em 10em rgba(0,0,0,0.5),
+		inset 0.5em 1em 0.5em rgba(255,255,255,0.2),
+		inset -0.5em -1em 0.5em rgba(0,0,0,0.2);
+}
+	.gametoy h1 {
+		color: #D0D1D6;
+		letter-spacing: 0.25em;
+		margin: 0.5em 0 1em 0;
+		text-shadow: 0 0 0.5em rgba(0,0,0,0.1), 
+			0.1em 0.1em 0.1em rgba(0,0,0,0.25);
+	}
+.screen, 
+.buttonTip {
+	font-family: 'silkscreen_normal', 'Press Start 2P', Arial, sans-serif;
+	font-size: 200%;
+	border: solid 1px #111;
+	background-color: #847E87;
+	color: #595652;
+	box-shadow: inset 0 0 1em rgba(0,0,0,0.15);
+}
+
+.screen {
+	position: relative;
+	width: 720px;  /* 180 x4 */
+	height: 540px;
+	margin: 0 auto;
+}
+
+.controls {
+	width: 720px;
+	margin: 0 auto;	
+	padding: 1em 0;
+}
+.controls:after {
+	content: "";
+	display: table;
+	clear: both;
+
+}
+	.controls .A,
+	.controls .B {
+		float: left;
+		width: 48%;
+		margin-right: 2%;
+		margin-bottom: 0.5em;
+		text-align: center;
+	}
+	.controls .A {
+		margin-right: 0;
+		margin-left: 2%;
+	}
+	.controls .outerButton {
+		font-size: 250%;
+		border: solid 5px white;
+		padding: 2px;
+		margin: 0 auto;
+		width: 3em;
+		height: 3em;
+		border-radius: 5em;
+		box-shadow: 0 0.5em 1em rgba(0,0,0,0.1);
+		background-color: #333;
+	}
+	.controls button {
+		width: inherit;
+		height: inherit;
+		font-size: inherit;
+		box-sizing: border-box;
+		border: solid 5px #7E245A;
+		background-color: #7E245A;
+		color: rgba(0,0,0,0.5);
+		border-radius: inherit;
+		box-shadow: inset 0.25em 0.25em 0.5em rgba(0,0,0,0.25),
+			inset -0.25em -0.25em 0.5em rgba(255,255,255,0.1),
+			0.25em 0.25em 0.5em rgba(0,0,0,0.5);
+	}
+	.controls button:active {
+		background-color: #6E144A;
+		box-shadow: inset 0.25em 0.25em 0.5em rgba(0,0,0,0.25),
+			inset -0.25em -0.25em 0.5em rgba(255,255,255,0.1);
+	}
+	.buttonTip {
+		width: 100%;
+		margin: 0 auto 0.5em auto;
+		padding: 0.1em 0;
+	}
+
+.menu {
+	position: absolute;
+	top: 2.5%; left: 2.5%;
+	z-index: 20;
+	background-color: #306082;
+	padding: 1em;
+	margin: 0;
+	width: 95%;
+	box-sizing: border-box;
+	border: solid 0.25em #CBDBFC;
+	color: #CBDBFC;
+	border-radius: 1em;
+}
+	.menu ul, .menu li { display: block; padding: 0; margin: 0; list-style: none;}
+
+	.menu li {
+		position: relative;
+		padding: 0.5em;
+		cursor: pointer;
+	}
+	.menu li:hover {
+		color: #fff;
+	}
+		.menu li.focused {
+		}
+		.menu li.focused:before {
+			content: ">";
+			position: absolute;
+			left: 0;
+		}
+	.menu hr {
+		border: 0;
+		height: 2px;
+		background: #fff;
+
+	}
+
+.actionMenu {
+
+}
+
+.statList, .rateList {
+	text-align: left;
+	font-size: 75%;
+}
+.rateList {
+	font-size: 50%;
+	border-top: solid 1px white;
+	padding-top: 0.5em;
+}
+	.label {
+		
+	}
+	.amounts {
+		text-align: right;
+		margin-bottom: 0.5em;
+	}
+
+.cost {
+	font-size: 80%;
+	color: #99E550;
+}
+	.tooExpensive, .cost.tooExpensive {
+		color: #D95763;
+	}
+
+.world {
+	position: absolute;
+	bottom: 0;
+	background-color: #9BADB7;
+	height: 100%;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0;
+	text-align: center;
+	overflow: hidden;
+
+}
+	.planet {
+		position: relative;
+		border-radius: 100%;
+		background-color: #8F563B;
+		
+		border: solid 2px #37946E;
+	}
+	.plot {
+		position: absolute;
+		box-sizing: border-box;
+		width: 32px;
+		border-top: solid 2px #8F563B;
+	}
+	.plot:even {
+		background: white;
+	}
+	.building {
+		position: absolute;
+		display: block;
+		width: 32px;
+		height: 80px;
+		top: -78px;	
+	}
+	.building > div {
+		height: 16px;
+	}
+	.floor {
+		color: transparent;
+		font-size: 16px;
+		/* border: solid 1px #222034; 
+		background-color: #595652; */
+		background-repeat: no-repeat;
+		background-position: center center;
+	}
+	.building .placeholder {
+		/* background-color: rgba(0,0,0,.2); */
+	}
+	.trees {
+		position: absolute;
+		height: 32px;
+		top: -32px;
+	}
+		.trees > div {
+			width: 6px;
+			float: left;
+			background: no-repeat center bottom url('../images/tree1.png');
+		}
+	.unknown {
+		color: #663931;
+	}
+	.floor.R {
+		background-image: url('../images/residential.png');
+	}
+	.floor.I {
+		background-image: url('../images/industrial.png');
+	}
+	.floor.L {
+		background-image: url('../images/lumbermill.png');
+	}
+	.floor.T {
+		background-image: url('../images/greenhouse.png');
+	}
+	.floor.A {
+		background-image: url('../images/greenhouse.png');
+	}
+
+.statsInfo,
+.plotInfo {
+	position: absolute;
+	width: 100%;
+	z-index: 10;
+}
+
+.statsInfo {
+	top: 0.5em;
+}
+.plotInfo {
+	bottom: 0.5em;
+	color: #663931;
+}
+.floorInfo {
+	font-size: 80%;
+}
+	.floorInfo > li {
+		display: block;
+		width: 70%;
+		margin: 0 auto;
+		padding: 0.5em;
+		margin-bottom: 2px;
+		background-color: #595652;
+		color: #CBDBFC;
+	}
+
+footer {
+	margin: 1em 0;
+	padding: 1em;
+	color: #bbb;
+	font-size: 80%;
+}
+	footer a, 
+	footer a:visited {
+		color: #8bb;
+	}
