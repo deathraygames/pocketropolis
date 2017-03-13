@@ -17,12 +17,12 @@ RocketBoots.loadComponents([
 ]);
 
 
-window.g = {};
+
 RocketBoots.ready(function(){
 
 	//==== GAME
 
-	var g = new RocketBoots.Game({
+	var g = window.g = new RocketBoots.Game({
 		name: "Pocketropolis",
 		instantiateComponents: [
 			{"state": "StateMachine"},
@@ -34,9 +34,13 @@ RocketBoots.ready(function(){
 			{"storage": "Storage"},
 			{"walkthrough": "Walkthrough"}
 		],
-		version: "v1.3.2"
+		version: "v0.1"
 	});
 	var curr = g.currencies = g.incrementer.currencies;
+	var planet = g.planet = new Planet({size: 1000, radius: 1000});
+	var city = g.city2 = new City({}, 0, 4);
+	
+
 
 	g.incrementer.addCurrencies([
 		// DEMAND
@@ -75,6 +79,9 @@ RocketBoots.ready(function(){
 			}
 		}
 	]);
+
+
+
 
 
 //==================================================================== OLD GAME

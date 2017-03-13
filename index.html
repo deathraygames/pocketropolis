@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Pocketropolis city-building game</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="styles/metropolis.css" />
+	<!-- <link href='http://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'> -->
+	<link href="fonts/silkscreen/silkscreen_normal.css" rel="stylesheet" type="text/css" charset="utf-8" />
+	<link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+
+<div class="screen">
+	<div id="sky"></div>
+	<div id="planet"></div>
+	<canvas id="city"></canvas>
+	<header id="stats" class="stats three-columns">
+		<dl class="col demand">
+			<div class="R">
+				<dt>R</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">xxxxxx</div>
+				</dd>
+			</div>
+			<div class="C">
+				<dt>C</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">xxxxxx</div>
+				</dd>
+			</div>
+			<div class="I">
+				<dt>I</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">xxxxxx</div>
+				</dd>
+			</div>			
+		</dl>
+		<dl class="col">
+			<div class="population">
+				<dt>Population</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">000,000,000</div>
+					<div class="trend"></div>
+				</dd>
+			</div>
+			<div class="commercialJobs">
+				<dt>Commericial Jobs</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">000,000,000</div>
+					<div class="trend"></div>
+				</dd>
+			</div>
+			<div class="industrialJobs">
+				<dt>Industrial Jobs</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">000,000,000</div>
+					<div class="trend"></div>
+				</dd>
+			</div>
+		</dl>
+		<dl class="col">
+			<div class="happiness">
+				<dt>Happiness</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">000,000,000</div>
+					<div class="trend"></div>
+				</dd>
+			</div>
+			<div class="production">
+				<dt>Production</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">000,000,000</div>
+					<div class="trend"></div>
+				</dd>
+			</div>
+			<div class="funds">
+				<dt>City Funds</dt>
+				<dd class="bar">
+					<div></div>
+					<div class="label">000,000,000</div>
+					<div class="trend"></div>
+				</dd>
+			</div>
+		</dl>
+	</header>
+	<nav id="navigation">
+		<a href="#"><div>Game</div><strong>Menu</strong></a>
+		<a href="#"><div>The</div><strong>City</strong></a>
+		<a href="#"><div>City</div><strong>Budget</strong></a>
+		<a href="#"><div>Building</div><strong>Permits</strong></a>
+		<a href="#"><strong>Public</strong><div>Requests</div></a>
+	</nav>
+</div>
+
+
+<div class="scripts">
+	<script src="https://rocket-boots.github.io/rocket-boots/scripts/rocketboots/core.js"></script>
+	<script> RocketBoots.useGitHubScripts(); </script>
+	<script src="scripts/pocketropolis-classes.js"></script>
+	<script src="scripts/pocketropolis.js"></script>
+</div>
+
+
+</body>
+</html>
