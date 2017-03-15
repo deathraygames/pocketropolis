@@ -7,7 +7,8 @@ RocketBoots.loadComponents([
 	"Dice",
 	"Loop",
 	//"entity",
-	//"world",
+	"Stage",
+	"World",
 	"Incrementer",
 	"Stage",
 	"Storage",
@@ -32,19 +33,40 @@ RocketBoots.ready(function(){
 			{"sounds": "SoundBank"},
 			{"notifier": "Notifier"},
 			{"storage": "Storage"},
-			{"walkthrough": "Walkthrough"}
+			{"walkthrough": "Walkthrough"},
+			{"world": "World"},
+			{"stage": "Stage"}
 		],
 		version: "v0.1"
 	});
+	var TOTAL_PLOTS 	= 100 // Each plot is ~64px
+		,PLANET_RADIUS 	= 1200 	//800;
+		,LOOP_DELAY 	= 100   	// 10 = 1/100th of a second (better than 60 fps)
+	;
 	var curr = g.currencies = g.incrementer.currencies;
-	var planet = g.planet = new Planet({size: 1000, radius: 1000});
-	var city = g.city = new City({startPlotIndex: 0, endPlotIndex: 4});
-	var permits = g.permits = [];
-	var requests = g.requests = [];
+
+	g.world.name = "Pocketropolis Known Galaxy";
+	g.world.setSizeRange({x: (-2 * PLANET_RADIUS), y: (-2 * PLANET_RADIUS)}, {x: (2 * PLANET_RADIUS), y: (2 * PLANET_RADIUS)});
+	g.world.addEntityGroups(["planet", "building"]);
+
+	g.planet = new Planet({size: TOTAL_PLOTS, radius: PLANET_RADIUS, world: g.world});
+	g.city = new City({startPlotIndex: 0, endPlotIndex: 4});
+	g.permits = [];
+	g.requests = [];
+
+	g.stage.addLayers(["planet", "building", "grid"]);
+	//g.stage.layers[2].stageGridScale = 50;
+	//g.stage.layers[2].worldGridScale = 10;
+	g.stage.connectToEntity(g.world);
+	//g.stage.camera.set({x: 0, y: (PLANET_RADIUS/2)}).focus();
+	g.stage.camera.set({x: 0, y: PLANET_RADIUS}).focus();
+	g.stage.resize();
+
 
 	// Add random buildings just for testing
 	// TODO: remove this
-	planet.plots.forEach(function(plot){
+
+	g.planet.plots.forEach(function(plot){
 		var building = plot.buildBuilding({name: "Random Building"});
 		if (building) {
 			plot.buildFloor();
@@ -53,7 +75,13 @@ RocketBoots.ready(function(){
 			if (Math.random() > 0.5) { plot.buildFloor(); }
 		}
 	});
+	g.planet.plots[0].building.entity.color = "#fff";
+	g.planet.plots[1].building.entity.color = "#ff4";
 
+	// START UP
+	// TODO: add this to states
+
+	g.stage.draw();
 
 
 	g.incrementer.addCurrencies([
@@ -95,7 +123,77 @@ RocketBoots.ready(function(){
 	]);
 
 
+	g.loop.set(function quickLoop (iteration){
+		//g.incrementer.incrementByElapsedTime(undefined, true);
+		//g.incrementer.calculate();
 
+		//var onePlotAngle = (Math.PI * 2) / TOTAL_PLOTS;
+		//g.stage.camera.pos.theta -= onePlotAngle/100;
+		//g.stage.camera.rotation += onePlotAngle/100;
+		g.stage.draw();
+	}, LOOP_DELAY)
+
+	g.loop.start();
+
+
+
+	g.setupEvents = function () {
+		// FIXME
+		//$(window).resize(function(e){ g.stage.resize(); });
+		g.setupSpin();
+	};
+
+
+	g.setupSpin = function () {
+		var start = null;
+		var cameraTheta, cameraRotation;
+		var SLOWNESS = 50;
+		var CONVERSION = (Math.PI * 2) / (SLOWNESS * TOTAL_PLOTS);
+
+		function getEventPageXY (e) { // Annoying necessary hack
+			// http://stackoverflow.com/a/16284281/1766230
+			var out = {x:0, y:0};
+			if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel'){
+				var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+				out.x = touch.pageX;
+				out.y = touch.pageY;
+			} else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave') {
+				out.x = e.pageX;
+				out.y = e.pageY;
+			}
+			return out;
+		}
+
+		function startSpin (e) {
+			console.log("start");
+			start = getEventPageXY(e);
+			cameraTheta = g.stage.camera.pos.theta;
+			cameraRotation = g.stage.camera.rotation;
+		}
+
+		function spin (e) {
+			var location, distance, deltaTheta;
+			if (start) {
+				location = getEventPageXY(e)
+				distance = start.x - location.x;
+				deltaTheta = (distance * CONVERSION);
+				g.stage.camera.pos.theta = cameraTheta - deltaTheta;
+				g.stage.camera.rotation = cameraRotation + deltaTheta;
+			}
+		}
+
+		function stopSpin (e) {
+			start = null;
+		}
+
+		$(document)
+			.on("mousedown touchstart", startSpin)
+			.on("mousemove touchmove", spin)
+			.on("mouseup touchend", stopSpin);
+	};
+
+
+	g.setupEvents();
 
 
 //==================================================================== OLD GAME

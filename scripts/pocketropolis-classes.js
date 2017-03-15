@@ -1,10 +1,31 @@
 // ES2015
 
 function Planet (options = {}) {
+	var p = this;
+	var TWO_PI = Math.PI * 2;
 	this.size = options.size;
 	this.radius = options.radius;
+	this.world = options.world;
 	this.plots = [];
 	this.people = [];
+
+	this.entity = new RocketBoots.Entity({
+		isMovable: false,
+		isPhysical: false,
+		size: {x: (p.radius * 2), y: (p.radius * 2)},
+		pos: {x: 0, y: 0},
+		color: "#335533"
+	});
+	this.entity.draw.custom = function(ctx, stageXY, entStageXYOffset){
+		ctx.beginPath();
+		ctx.fillStyle = p.entity.color;
+		//console.log(p.entity.pos.x, p.entity.pos.y, stageXY.x, stageXY.y, entStageXYOffset.x, entStageXYOffset.y);
+		ctx.arc(stageXY.x, stageXY.y, p.radius, 0, TWO_PI);
+		ctx.closePath();
+		ctx.fill();
+	};
+	this.world.putIn(this.entity, "planet");
+
 	Object.defineProperty(g, "population", {get: function(){ 
 		return this.planet.people.length; 
 	}});
@@ -100,12 +121,66 @@ City.prototype = {
 };
 
 function Building (options = {}) {
+	var b = this;
+	var angle; 
+	var radius;
+	var groundOffset = 10;
+	var MAX_FLOORS = 7;
+	var fullSize = {x: 64, y: (MAX_FLOORS * 32)};
+
 	this.plot = options.plot || null; // parent
 	this.city = options.city || null;
 
+	angle = (this.plot.plotIndex / this.plot.planet.size) * (Math.PI * 2);
+	angle = (Math.PI * 2) - angle;
+	angle += (Math.PI/2);
+	radius = this.plot.planet.radius + (fullSize.y/2) - groundOffset;
+	position = new RocketBoots.Coords();
+	position.setByPolarCoords(radius, angle);
+	// Angle for the rotation
+	angle += (Math.PI/2);
+	angle *= -1;
+
 	this.floors = [];
-	this.name = options.name || "Unnamed Building";	
+
+	// TODO: Remove this
+	var randomFloors = (Math.round(Math.random() * MAX_FLOORS));
+	while (randomFloors--) {
+		this.buildFloor();
+	}
+
+	this.name = options.name || "Unnamed Building";
+	this.entity = new RocketBoots.Entity({
+		name: b.name,
+		isMovable: false,
+		size: fullSize,
+		rotation: angle, 
+		pos: position,
+		color: "rgba(100,100,120,0.5)"
+	});
+	this.entity.draw.custom = function(ctx, stageXY, entStageXYOffset) {
+		var f = b.floors.length;
+		//ctx.save();
+		ctx.fillStyle = b.entity.color;
+		ctx.fillRect(entStageXYOffset.x, entStageXYOffset.y, b.entity.size.x, b.entity.size.y);
+		//ctx.restore();
+
+		//while (f--) {
+		//	b.floors[f].draw();
+		//}
+	};
+	this.plot.planet.world.putIn(this.entity, "building");
+
 	// TODO: add type, etc?
+};
+Building.prototype = {
+	floors: [],
+	get size () {
+		return new RocketBoots.Coords(64, 32 * this.floors.length);
+	},
+	set size (val) {
+		return this.size;
+	}
 };
 Building.prototype.buildFloor = function (options = {}) {
 	var floor;

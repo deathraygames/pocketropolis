@@ -7,14 +7,16 @@
 	<link rel="stylesheet" href="styles/metropolis.css" />
 	<!-- <link href='http://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'> -->
 	<link href="fonts/silkscreen/silkscreen_normal.css" rel="stylesheet" type="text/css" charset="utf-8" />
-	<link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="images/favicon-city.ico" type="image/x-icon" />
 </head>
 <body>
 
 <div class="screen">
 	<div id="sky"></div>
 	<div id="planet"></div>
-	<canvas id="city"></canvas>
+	<div id="city">
+		<div id="stage"></div>
+	</div>
 	<div id="building" class="building three-columns">
 		<div class="col information">
 
@@ -115,7 +117,10 @@
 
 <div class="scripts">
 	<script src="https://rocket-boots.github.io/rocket-boots/scripts/rocketboots/core.js"></script>
+<script src="Coords.js"></script>
+<script src="Stage.js"></script>
 	<script> RocketBoots.useGitHubScripts(); </script>
+
 	<script src="scripts/pocketropolis-classes.js"></script>
 	<script src="scripts/pocketropolis.js"></script>
 </div>
