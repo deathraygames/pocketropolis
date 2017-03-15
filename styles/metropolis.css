@@ -141,20 +141,23 @@ dd {
 	border-bottom: solid 1px rgba(255,255,255,0.1);
 }
 	.stats dt {
-		width: 1em;
-		height: 1em;
+		width: 20px;
+		height: 20px;
 		margin: 0.5em 0;
-		background: #fff;
 		white-space: nowrap;
 		color: transparent;
 		overflow: hidden;
+		background-position: center center;
+		background-repeat: no-repeat;
 	}
+	/*
 	.stats .demand dt {
 		background: transparent;
 		color: white;
 		text-align: center;
 		font-size: 14px;
 	}
+	*/
 	/*
 	.stats dt:hover {
 		color: black;
@@ -176,7 +179,15 @@ dd {
 		height: 1em;
 		border: solid 1px black;
 	}
-
+	.stats .R dt { background-image: url('../images/icon-R.png'); }
+	.stats .C dt { background-image: url('../images/icon-C.png'); }
+	.stats .I dt { background-image: url('../images/icon-I.png'); }
+	.stats .population dt { background-image: url('../images/icon-person.png'); }
+	.stats .commercialJobs dt { background-image: url('../images/icon-c-jobs.png'); }
+	.stats .industrialJobs dt { background-image: url('../images/icon-i-jobs.png'); }
+	.stats .happiness dt { background-image: url('../images/icon-happy.png'); }
+	.stats .production dt { background-image: url('../images/icon-hammer.png'); }
+	.stats .funds dt { background-image: url('../images/icon-money.png'); }
 
 #navigation {
 	z-index: 100;
