@@ -1,18 +1,22 @@
 data = {
 	"zoneTypes": {
 		"R": {
-			name: "Residential"
+			name: "Residential",
+			color: ["#66ff66"]
 		},
 		"C": {
-			name: "Commercial"
+			name: "Commercial",
+			color: ["#6666ff"]
 		},
 		"I": {
-			name: "Industrial"
+			name: "Industrial",
+			color: ["#ffff66"]
 		},
 		"P": {
-			name: "Public"
+			name: "Public",
+			color: ["#66ffff"]
 		}
-	}
+	},
 	"resources": {
 		"milk": {
 			buy: 10
@@ -60,17 +64,17 @@ data = {
 		"C-1": {
 			zoneType: "C",
 			imageFileName: "C-1.png",
-			buildings: ["C-low", "C-high"]
+			buildings: ["C-low", "C-high"],
 			jobs: 2,
 			noise: 10
 		},
 		"I-1": {
 			zoneType: "I",
 			imageFileName: "I-1.png",
-			buildings: ["I-low", "I-high"]
+			buildings: ["I-low", "I-high"],
 			jobs: 3,
 			produces: "yogurt", // Might want to make this "ALL"?
-			pollution: 10
+			pollution: 10,
 			noise: 10
 		}
 	}

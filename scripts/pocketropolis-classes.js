@@ -126,7 +126,9 @@ function Building (options = {}) {
 	var radius;
 	var groundOffset = 10;
 	var MAX_FLOORS = 7;
-	var fullSize = {x: 64, y: (MAX_FLOORS * 32)};
+	var FLOOR_HEIGHT = 32;
+	var FLOOR_WIDTH = 64;
+	var fullSize = {x: FLOOR_WIDTH, y: (MAX_FLOORS * FLOOR_HEIGHT)};
 
 	this.plot = options.plot || null; // parent
 	this.city = options.city || null;
@@ -142,6 +144,7 @@ function Building (options = {}) {
 	angle *= -1;
 
 	this.floors = [];
+	this.zoneType = options.zoneType || "?";
 
 	// TODO: Remove this
 	var randomFloors = (Math.round(Math.random() * MAX_FLOORS));
@@ -160,14 +163,16 @@ function Building (options = {}) {
 	});
 	this.entity.draw.custom = function(ctx, stageXY, entStageXYOffset) {
 		var f = b.floors.length;
+		var y = entStageXYOffset.y + FLOOR_HEIGHT;
 		//ctx.save();
 		ctx.fillStyle = b.entity.color;
 		ctx.fillRect(entStageXYOffset.x, entStageXYOffset.y, b.entity.size.x, b.entity.size.y);
 		//ctx.restore();
 
-		//while (f--) {
-		//	b.floors[f].draw();
-		//}
+		while (f--) {
+			y = entStageXYOffset.y - (FLOOR_HEIGHT * (MAX_FLOORS - f));
+			ctx.drawImage(b.floors[f].image, entStageXYOffset.x, y, FLOOR_WIDTH, FLOOR_HEIGHT);
+		}
 	};
 	this.plot.planet.world.putIn(this.entity, "building");
 
@@ -194,13 +199,41 @@ function Floor (options = {}) {
 	this.building = options.building; // parent
 	this.level = 0;
 
-	this.typeKey = options.typeKey;
+	this.floorKey = options.floorKey;
+	this.image = options.image;
+	this.floorData = options.floorData;
+	this.images = options.images;
 	
 	this.workers = [];
 	this.residents = [];
 	this.goods = 0;
 	this.resources = 0;
 };
+Floor.prototype = {
+	get zoneType () {
+		return this.floorData[this.floorKey].zoneType;
+	},
+	set zoneType (val) {
+		console.warn("Cannot set value.");
+		return this.zoneType;
+	},
+	get imageFileName () {
+		return this.floorData[this.floorKey].imageFileName;
+	},
+	set imageFileName (val) {
+		console.warn("Cannot set value.");
+		return this.imageFileName;
+	},
+	get image () {
+		// TODO: Add ability to show vacant buildings differently
+		return this.images[this.imageFileName];
+	},
+	set image (val) {
+		console.warn("Cannot set value.");
+		return this.image;
+	}
+}
+
 
 function Person (key) {
 	this.key = key;

@@ -30,6 +30,7 @@ RocketBoots.ready(function(){
 			{"loop": "Loop"},
 			{"incrementer": "Incrementer"},
 			{"dice": "Dice"},
+			{"images": "ImageBank"},
 			{"sounds": "SoundBank"},
 			{"notifier": "Notifier"},
 			{"storage": "Storage"},
@@ -67,12 +68,14 @@ RocketBoots.ready(function(){
 	// TODO: remove this
 
 	g.planet.plots.forEach(function(plot){
-		var building = plot.buildBuilding({name: "Random Building"});
+		var zoneType = g.dice.selectRandom(["R","C","I"]);
+		var building = plot.buildBuilding({name: "Random Building", zoneType: zoneType});
 		if (building) {
-			plot.buildFloor();
-			if (Math.random() > 0.5) { plot.buildFloor(); }
-			if (Math.random() > 0.5) { plot.buildFloor(); }
-			if (Math.random() > 0.5) { plot.buildFloor(); }
+			var floorKey = zoneType + "-1";
+			plot.buildFloor({floorKey: floorKey});
+			if (Math.random() > 0.5) { plot.buildFloor({floorKey: floorKey}); }
+			if (Math.random() > 0.5) { plot.buildFloor({floorKey: floorKey}); }
+			if (Math.random() > 0.5) { plot.buildFloor({floorKey: floorKey}); }
 		}
 	});
 	g.planet.plots[0].building.entity.color = "#fff";
