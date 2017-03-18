@@ -107,30 +107,37 @@ dd {
 	.building > * {
 		transition: all 0.5s;
 	}
-	.building.selected .information {
+	.building.selected {
+		display: block;
+	}
+	.building.selected .floor-info {
 		background: rgba(255,255,255,0.1);
 		margin: 2%;
 		width: 29%;
 		min-height: 6em;
 		max-height: 96%;
 		padding: 1em;
+		box-shadow: 0 0.5em 0.2em rgba(0,0,0,0.1);
 	}
 	.building .selection {
 		height: 100%;
 		border: solid 0em rgba(255,255,255,0.0);
-		cursor: pointer;
 	}
-	.building .selection:hover,
 	.building.selected .selection {
 		border: solid 1em rgba(255,255,255,0.1);
+		box-shadow: 0 0.5em 0.2em rgba(0,0,0,0.1);
 	}
-	.building.selected .action {
+	.building.selected .building-info {
 		background: rgba(255,255,255,0.1);
 		margin: 2%;
 		width: 29%;
 		min-height: 6em;
 		max-height: 96%;
 		padding: 1em;
+		box-shadow: 0 0.5em 0.2em rgba(0,0,0,0.1);
+	}
+	.building.noBuilding .floor-info {
+		opacity: 0;
 	}
 
 .stats {

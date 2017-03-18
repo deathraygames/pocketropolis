@@ -1,5 +1,9 @@
 // ES2015
 
+
+var FLOOR_HEIGHT = 32;
+var FLOOR_WIDTH = 64;
+
 function Planet (options = {}) {
 	var p = this;
 	var TWO_PI = Math.PI * 2;
@@ -53,15 +57,39 @@ Planet.prototype.init = function(){
 		this.plots.push( new Plot({planet: planet, plotIndex: i }) );
 	}
 };
+Planet.prototype.unselectPlots = function(){
+	this.plots.forEach(function(plot){
+		plot.isSelected = false;
+	});
+};
 
 
 
 function Plot (options = {}) {
+
 	this.building = null;
 	// TODO: add natural features? like water or trees or mountains?
 	this.planet = options.planet || null; // parent
 	this.plotIndex = options.plotIndex;
 	this.city = options.city || null;
+
+	this.maxFloors = 7;
+	this.groundOffset = 10; // pixels
+	this.width = FLOOR_WIDTH;
+	this.fullSize = {x: this.width, y: (this.maxFloors * FLOOR_HEIGHT)};
+
+	this.angle = Math.PI * 2 * (1.25 - (this.plotIndex / this.planet.size));
+	this.radius = this.planet.radius - this.groundOffset;
+	this.pos = new RocketBoots.Coords();
+	this.pos.setByPolarCoords(this.radius, this.angle);
+};
+Plot.prototype = {
+	get hasBuilding () {
+		return (this.building === null || typeof this.building !== "object") ? false : true;
+	},
+	set hasBuilding (val) {
+		return this.hasBuilding;
+	}
 };
 Plot.prototype.buildBuilding = function (options = {}) {
 	if (this.building !== null) {
@@ -78,6 +106,13 @@ Plot.prototype.buildFloor = function (options = {}) {
 	}
 	return this.building.buildFloor(options);
 };
+Plot.prototype.select = function(){
+	g.planet.unselectPlots();
+	this.isSelected = true;
+	console.log("Plot selected:", this.plotIndex);
+};
+
+
 
 function City (options = {}) {
 	this.planet = options.planet; // parent
@@ -125,30 +160,29 @@ function Building (options = {}) {
 	var b = this;
 	var angle; 
 	var radius;
-	var groundOffset = 10;
-	var MAX_FLOORS = 7;
+	var position = new RocketBoots.Coords();
+	var maxFloors;
+	var fullSize;
 	var FLOOR_HEIGHT = 32;
 	var FLOOR_WIDTH = 64;
-	var fullSize = {x: FLOOR_WIDTH, y: (MAX_FLOORS * FLOOR_HEIGHT)};
 
 	this.plot = options.plot || null; // parent
 	this.city = options.city || null;
 
-	angle = (this.plot.plotIndex / this.plot.planet.size) * (Math.PI * 2);
-	angle = (Math.PI * 2) - angle;
-	angle += (Math.PI/2);
-	radius = this.plot.planet.radius + (fullSize.y/2) - groundOffset;
-	position = new RocketBoots.Coords();
+	maxFloors = this.plot.maxFloors;
+	fullSize = {x: FLOOR_WIDTH, y: (maxFloors * FLOOR_HEIGHT)};
+	angle = this.plot.angle;
+	radius = this.plot.radius + (fullSize.y/2);
 	position.setByPolarCoords(radius, angle);
+
 	// Angle for the rotation
-	angle -= (Math.PI/2);
-	angle *= -1;
+	angle = (angle - (Math.PI/2)) * -1;
 
 	this.floors = [];
 	this.zoneType = options.zoneType || "?";
 
 	// TODO: Remove this
-	// var randomFloors = (Math.round(Math.random() * MAX_FLOORS));
+	// var randomFloors = (Math.round(Math.random() * maxFloors));
 	// while (randomFloors--) {
 	// 	this.buildFloor();
 	// }
@@ -168,7 +202,7 @@ function Building (options = {}) {
 		//ctx.fillStyle = b.entity.color;
 		//ctx.fillRect(entStageXYOffset.x, entStageXYOffset.y, b.entity.size.x, b.entity.size.y);
 		while (f--) {
-			y = entStageXYOffset.y + (FLOOR_HEIGHT * (MAX_FLOORS - (f + 1)));
+			y = entStageXYOffset.y + (FLOOR_HEIGHT * (maxFloors - (f + 1)));
 			ctx.fillStyle = "rgba(0,0,0,0.4)"; // TODO: add windows color backgrounds
 			ctx.fillRect(entStageXYOffset.x, y, FLOOR_WIDTH, FLOOR_HEIGHT);
 			ctx.drawImage(b.floors[f].image, entStageXYOffset.x, y, FLOOR_WIDTH, FLOOR_HEIGHT);

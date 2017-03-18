@@ -43,9 +43,12 @@ RocketBoots.ready(function(){
 	var TOTAL_PLOTS 	= 100 // Each plot is ~64px
 		,PLANET_RADIUS 	= 1200 	//800;
 		,LOOP_DELAY 	= 100   	// 10 = 1/100th of a second (better than 60 fps)
+		,TWO_PI			= Math.PI * 2
 	;
 	var data = window.data; // Comes from data file
 	var curr = g.currencies = g.incrementer.currencies;
+
+	g.taps = [];
 
 	// The "world" acts as the grid for all the entities; can think of it as
 	// the physical universe; centered (0,0) on the planet
@@ -54,7 +57,18 @@ RocketBoots.ready(function(){
 		{x: (-2 * PLANET_RADIUS), y: (-2 * PLANET_RADIUS)}, 
 		{x: (2 * PLANET_RADIUS), y: (2 * PLANET_RADIUS)}
 	);
-	g.world.addEntityGroups(["planet", "building"]);
+	g.world.addEntityGroups(["planet", "building", "taps"]);
+
+	// The "stage" is the 2d view for displaying all entities; it is connected
+	// to the world so it knows about all entities that should be shown
+	g.stage.addLayers(["planet", "building", "grid", "taps"]);
+	//g.stage.layers[2].stageGridScale = 50;
+	//g.stage.layers[2].worldGridScale = 10;
+	g.stage.connectToEntity(g.world);
+	//g.stage.camera.set({x: 0, y: (PLANET_RADIUS/2)}).focus();
+	g.stage.camera.set({x: 0, y: PLANET_RADIUS}).focus();
+	g.stage.resize();
+
 
 	// The planet is the round circle, but more importantly is the container
 	// for all plots, buildings, and people
@@ -64,21 +78,11 @@ RocketBoots.ready(function(){
 		world: g.world,
 		data: data
 	});
-	// Right now there is only one city on the planet
-	g.city = new City({startPlotIndex: 0, endPlotIndex: 4});
-	g.permits = [];
-	g.requests = [];
+	// Initializing the city will happen elsewhere
+	g.city = null;
 
-	// The "stage" is the 2d view for displaying all entities; it is connected
-	// to the world so it knows about all entities that should be shown
-	g.stage.addLayers(["planet", "building", "grid"]);
-	//g.stage.layers[2].stageGridScale = 50;
-	//g.stage.layers[2].worldGridScale = 10;
-	g.stage.connectToEntity(g.world);
-	//g.stage.camera.set({x: 0, y: (PLANET_RADIUS/2)}).focus();
-	g.stage.camera.set({x: 0, y: PLANET_RADIUS}).focus();
-	g.stage.resize();
 
+	//==== Currencies
 
 	g.incrementer.addCurrencies([
 		// DEMAND
@@ -119,6 +123,8 @@ RocketBoots.ready(function(){
 	]);
 
 
+	//==== Loop
+
 	g.loop.set(function quickLoop (iteration){
 		//g.incrementer.incrementByElapsedTime(undefined, true);
 		//g.incrementer.calculate();
@@ -129,6 +135,8 @@ RocketBoots.ready(function(){
 		g.stage.draw();
 	}, LOOP_DELAY);
 
+
+	//==== States
 
 	g.state.addStates({
 		"preload": {
@@ -173,7 +181,10 @@ RocketBoots.ready(function(){
 
 	// Add random buildings just for testing
 	g.createRandomBuildings = function () {
-		g.planet.plots.slice(0,6).forEach(function(plot){
+		g.planet.plots.slice(0,4).forEach(function(plot){
+			if (plot.building !== null) {
+				return;
+			}
 			var zoneType = g.dice.selectRandom(["R","C","I"]);
 			var building = plot.buildBuilding({name: "Random Building", zoneType: zoneType});
 			if (building) {
@@ -189,8 +200,25 @@ RocketBoots.ready(function(){
 				if (Math.random() > 0.5) { plot.buildFloor(floorOptions); }
 			}
 		});
-		g.planet.plots[0].building.entity.color = "#fff";
-		g.planet.plots[1].building.entity.color = "#ff4";
+	};
+
+	g.createStarterCity = function () {
+		// Right now there is only one city on the planet
+		var city = new City();
+		city.permits = [];
+		city.requests = [];
+
+		// TODO: set plot ownership based on proximity to owned buildings? Or have the ability to buy land?
+		[0,1,2,3,4,5,6].forEach(function(i){
+			g.planet.plots[i].city = city;
+		});
+		g.planet.plots[2].plot.buildBuilding({name: "First Residential", zoneType: "R"});
+		g.planet.plots[3].plot.buildBuilding({name: "First Commercial", zoneType: "C"});
+		g.planet.plots[4].plot.buildBuilding({name: "First Industrial", zoneType: "I"});
+
+		// TODO: build one building on each
+
+		g.city = city; // expose to the game object
 	};
 
 
@@ -199,19 +227,70 @@ RocketBoots.ready(function(){
 		return false;
 	};
 
+	//==== Interface stuff
+
+	g.rotateCamera = function (angle) {
+
+	};
+
+	g.selectNearestPlot = function (positionCoord) {
+		var smallestDistance = Infinity;
+		var nearestPlot = null;
+		if (!positionCoord) {
+			return false;
+		}
+		g.planet.plots.forEach(function(plot){
+			var dist = positionCoord.getDistance(plot.pos);
+			if (dist < smallestDistance) {
+				nearestPlot = plot;
+				smallestDistance = dist;
+			}
+		});
+		g.selectPlot(nearestPlot);
+	};
+
+	g.selectPlot = function(plot){
+		var $buildingSection = $(".building");
+		plot.select();
+		g.stage.camera.pos.set(plot.pos);
+		g.stage.camera.rotation = (plot.angle - (Math.PI/2)) * -1;
+
+		if (plot.hasBuilding) {
+			$(".zone-type").html(data.zoneTypes[plot.building.zoneType].name);
+			$(".floor-num").html(plot.building.floors.length);
+			$buildingSection.removeClass("noBuilding");
+		} else {
+			$buildingSection.addClass("noBuilding");
+		}
+		// TODO: set zoom/scale for the camera
+		$buildingSection.addClass("selected");
+	};
+
+	g.unselectPlots = function(){
+		g.planet.unselectPlots();
+		// TODO: close down side
+		$(".building").removeClass("selected");
+	};
+
+
+
+	//==== Setup Functions (Typically only run once)
 
 	g.setupEvents = function () {
 		// FIXME
 		//$(window).resize(function(e){ g.stage.resize(); });
-		g.setupSpin();
+		g.setupTaps();
 	};
 
 
-	g.setupSpin = function () {
-		var start = null;
+	g.setupTaps = function () {
+		var startTapXY = null;
+		var tapEntity = null;
+		var dragDistance = {x: 0, y: 0};
 		var cameraTheta, cameraRotation;
-		var SLOWNESS = 50;
-		var CONVERSION = (Math.PI * 2) / (SLOWNESS * TOTAL_PLOTS);
+		var DRAG_THRESHOLD = 20; // what's considered a tap vs. a drag
+		var SLOWNESS = 50; // how fast should we spin
+		var CONVERSION = (Math.PI * 2) / (SLOWNESS * TOTAL_PLOTS); // radians
 
 		function getEventPageXY (e) { // Annoying necessary hack
 			// http://stackoverflow.com/a/16284281/1766230
@@ -227,32 +306,75 @@ RocketBoots.ready(function(){
 			return out;
 		}
 
-		function startSpin (e) {
-			console.log("start");
-			start = getEventPageXY(e);
+		function startSpin () {
 			cameraTheta = g.stage.camera.pos.theta;
 			cameraRotation = g.stage.camera.rotation;
 		}
 
-		function spin (e) {
-			var location, distance, deltaTheta;
-			if (start) {
-				location = getEventPageXY(e)
-				distance = start.x - location.x;
-				deltaTheta = (distance * CONVERSION);
+		function spin () {
+			var deltaTheta;
+			if (startTapXY) {
+				deltaTheta = (dragDistance.x * CONVERSION);
 				g.stage.camera.pos.theta = cameraTheta - deltaTheta;
 				g.stage.camera.rotation = cameraRotation + deltaTheta;
 			}
 		}
 
-		function stopSpin (e) {
-			start = null;
+
+		function startTap (e) {
+			startTapXY = getEventPageXY(e);
+			dragDistance.x = 0;
+			dragDistance.y = 0;
+
+			// Add an entity of a circle so we can be sure where in the world was tapped
+			tapEntity = g.world.putNewIn({
+				isPhysical: false,
+				color: "rgba(255,255,255,0.1)"
+			}, ["taps"]);
+			tapEntity.draw.custom = function(ctx, stageXY){
+				if (tapEntity === null) { return; }
+				ctx.beginPath();
+				ctx.fillStyle = tapEntity.color;
+				ctx.strokeStyle = "rgba(255,255,255,0.25)";
+				ctx.arc(stageXY.x, stageXY.y, 10, 0, TWO_PI);
+				ctx.closePath();
+				ctx.fill();
+				ctx.stroke();
+			};
+			tapEntity.pos = g.stage.getPositionFromEventPageCoords(startTapXY);
+
+			startSpin(startTapXY);
+		}
+
+		function moveTap (e) {
+			var moveXY = getEventPageXY(e);
+			if (startTapXY) {
+				dragDistance.x = startTapXY.x - moveXY.x;
+				dragDistance.y = startTapXY.y - moveXY.y;
+			}
+			spin();
+		}
+
+		function endTap (e) {
+			var endXY = getEventPageXY(e);
+			var endPos = g.stage.getPositionFromEventPageCoords(endXY);
+			if (Math.abs(dragDistance.x) < DRAG_THRESHOLD) {
+				// Then this may have been a click
+				g.selectNearestPlot(endPos);
+			} else {
+				g.unselectPlots();
+			}
+			// Destroy temporary things
+			g.world.takeOut(tapEntity); // FIXME: take out all "taps"
+
+			tapEntity = null;
+			startTapXY = null; // stops spin
 		}
 
 		$(document)
-			.on("mousedown touchstart", startSpin)
-			.on("mousemove touchmove", spin)
-			.on("mouseup touchend", stopSpin);
+			.on("mousedown touchstart", startTap)
+			.on("mousemove touchmove", moveTap)
+			.on("mouseup touchend", endTap);
 	};
 
 
