@@ -1,4 +1,4 @@
-data = {
+var data = {
 	"zoneTypes": {
 		"R": {
 			name: "Residential",
@@ -58,19 +58,19 @@ data = {
 	"floors": {
 		"R-1": {
 			zoneType: "R",
-			imageFileName: "R-1.png",
+			imageFileName: "R-1",
 			buildings: ["R-low", "R-high"]
 		},
 		"C-1": {
 			zoneType: "C",
-			imageFileName: "C-1.png",
+			imageFileName: "C-1",
 			buildings: ["C-low", "C-high"],
 			jobs: 2,
 			noise: 10
 		},
 		"I-1": {
 			zoneType: "I",
-			imageFileName: "I-1.png",
+			imageFileName: "I-1",
 			buildings: ["I-low", "I-high"],
 			jobs: 3,
 			produces: "yogurt", // Might want to make this "ALL"?

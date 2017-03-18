@@ -6,6 +6,7 @@ function Planet (options = {}) {
 	this.size = options.size;
 	this.radius = options.radius;
 	this.world = options.world;
+	this.data = options.data;
 	this.plots = [];
 	this.people = [];
 
@@ -81,11 +82,10 @@ Plot.prototype.buildFloor = function (options = {}) {
 function City (options = {}) {
 	this.planet = options.planet; // parent
 	this.money = new RocketBoots.Currency();
-	this.startPlotIndex = options.startPlotIndex;
-	this.endPlotIndex = options.endPlotIndex;
 };
 City.prototype = {
 	get plots(){
+		// TODO: Fix this so it gets plots from planet.plots based on city prop
 		return this.planet.plots.slice(startPlotIndex, endPlotIndex);
 	},
 	get buildings(){
@@ -93,6 +93,7 @@ City.prototype = {
 		return [];
 	},
 	get size(){
+		// TODO: Fix this to use this.plots
 		return this.endPlotIndex - this.startPlotIndex + 1;
 	},
 	get population() {
@@ -140,17 +141,17 @@ function Building (options = {}) {
 	position = new RocketBoots.Coords();
 	position.setByPolarCoords(radius, angle);
 	// Angle for the rotation
-	angle += (Math.PI/2);
+	angle -= (Math.PI/2);
 	angle *= -1;
 
 	this.floors = [];
 	this.zoneType = options.zoneType || "?";
 
 	// TODO: Remove this
-	var randomFloors = (Math.round(Math.random() * MAX_FLOORS));
-	while (randomFloors--) {
-		this.buildFloor();
-	}
+	// var randomFloors = (Math.round(Math.random() * MAX_FLOORS));
+	// while (randomFloors--) {
+	// 	this.buildFloor();
+	// }
 
 	this.name = options.name || "Unnamed Building";
 	this.entity = new RocketBoots.Entity({
@@ -159,18 +160,17 @@ function Building (options = {}) {
 		size: fullSize,
 		rotation: angle, 
 		pos: position,
-		color: "rgba(100,100,120,0.5)"
+		color: "rgba(100,100,120,0.15)"
 	});
 	this.entity.draw.custom = function(ctx, stageXY, entStageXYOffset) {
 		var f = b.floors.length;
-		var y = entStageXYOffset.y + FLOOR_HEIGHT;
-		//ctx.save();
-		ctx.fillStyle = b.entity.color;
-		ctx.fillRect(entStageXYOffset.x, entStageXYOffset.y, b.entity.size.x, b.entity.size.y);
-		//ctx.restore();
-
+		var y;
+		//ctx.fillStyle = b.entity.color;
+		//ctx.fillRect(entStageXYOffset.x, entStageXYOffset.y, b.entity.size.x, b.entity.size.y);
 		while (f--) {
-			y = entStageXYOffset.y - (FLOOR_HEIGHT * (MAX_FLOORS - f));
+			y = entStageXYOffset.y + (FLOOR_HEIGHT * (MAX_FLOORS - (f + 1)));
+			ctx.fillStyle = "rgba(0,0,0,0.4)"; // TODO: add windows color backgrounds
+			ctx.fillRect(entStageXYOffset.x, y, FLOOR_WIDTH, FLOOR_HEIGHT);
 			ctx.drawImage(b.floors[f].image, entStageXYOffset.x, y, FLOOR_WIDTH, FLOOR_HEIGHT);
 		}
 	};
@@ -178,6 +178,7 @@ function Building (options = {}) {
 
 	// TODO: add type, etc?
 };
+
 Building.prototype = {
 	floors: [],
 	get size () {
@@ -200,9 +201,16 @@ function Floor (options = {}) {
 	this.level = 0;
 
 	this.floorKey = options.floorKey;
-	this.image = options.image;
-	this.floorData = options.floorData;
-	this.images = options.images;
+	this.floorData = this.building.plot.planet.data.floors[this.floorKey];
+	this.imageBank = options.imageBank;
+
+	if (typeof this.floorData === "undefined") {
+		console.warn("No floor data for floor. key: ", this.floorKey, " data: ", this.building.plot.planet.data.floors);
+	}
+	this.imageFileName = this.floorData.imageFileName;
+	if (typeof this.imageFileName !== "string") {
+		console.warn("No imageFileName for floor.", this.floorKey, this.floorData[this.floorKey]);
+	}
 	
 	this.workers = [];
 	this.residents = [];
@@ -217,16 +225,9 @@ Floor.prototype = {
 		console.warn("Cannot set value.");
 		return this.zoneType;
 	},
-	get imageFileName () {
-		return this.floorData[this.floorKey].imageFileName;
-	},
-	set imageFileName (val) {
-		console.warn("Cannot set value.");
-		return this.imageFileName;
-	},
 	get image () {
 		// TODO: Add ability to show vacant buildings differently
-		return this.images[this.imageFileName];
+		return this.imageBank.get(this.imageFileName);
 	},
 	set image (val) {
 		console.warn("Cannot set value.");

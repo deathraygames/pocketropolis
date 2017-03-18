@@ -44,17 +44,33 @@ RocketBoots.ready(function(){
 		,PLANET_RADIUS 	= 1200 	//800;
 		,LOOP_DELAY 	= 100   	// 10 = 1/100th of a second (better than 60 fps)
 	;
+	var data = window.data; // Comes from data file
 	var curr = g.currencies = g.incrementer.currencies;
 
+	// The "world" acts as the grid for all the entities; can think of it as
+	// the physical universe; centered (0,0) on the planet
 	g.world.name = "Pocketropolis Known Galaxy";
-	g.world.setSizeRange({x: (-2 * PLANET_RADIUS), y: (-2 * PLANET_RADIUS)}, {x: (2 * PLANET_RADIUS), y: (2 * PLANET_RADIUS)});
+	g.world.setSizeRange(
+		{x: (-2 * PLANET_RADIUS), y: (-2 * PLANET_RADIUS)}, 
+		{x: (2 * PLANET_RADIUS), y: (2 * PLANET_RADIUS)}
+	);
 	g.world.addEntityGroups(["planet", "building"]);
 
-	g.planet = new Planet({size: TOTAL_PLOTS, radius: PLANET_RADIUS, world: g.world});
+	// The planet is the round circle, but more importantly is the container
+	// for all plots, buildings, and people
+	g.planet = new Planet({
+		size: TOTAL_PLOTS, 
+		radius: PLANET_RADIUS, 
+		world: g.world,
+		data: data
+	});
+	// Right now there is only one city on the planet
 	g.city = new City({startPlotIndex: 0, endPlotIndex: 4});
 	g.permits = [];
 	g.requests = [];
 
+	// The "stage" is the 2d view for displaying all entities; it is connected
+	// to the world so it knows about all entities that should be shown
 	g.stage.addLayers(["planet", "building", "grid"]);
 	//g.stage.layers[2].stageGridScale = 50;
 	//g.stage.layers[2].worldGridScale = 10;
@@ -62,29 +78,6 @@ RocketBoots.ready(function(){
 	//g.stage.camera.set({x: 0, y: (PLANET_RADIUS/2)}).focus();
 	g.stage.camera.set({x: 0, y: PLANET_RADIUS}).focus();
 	g.stage.resize();
-
-
-	// Add random buildings just for testing
-	// TODO: remove this
-
-	g.planet.plots.forEach(function(plot){
-		var zoneType = g.dice.selectRandom(["R","C","I"]);
-		var building = plot.buildBuilding({name: "Random Building", zoneType: zoneType});
-		if (building) {
-			var floorKey = zoneType + "-1";
-			plot.buildFloor({floorKey: floorKey});
-			if (Math.random() > 0.5) { plot.buildFloor({floorKey: floorKey}); }
-			if (Math.random() > 0.5) { plot.buildFloor({floorKey: floorKey}); }
-			if (Math.random() > 0.5) { plot.buildFloor({floorKey: floorKey}); }
-		}
-	});
-	g.planet.plots[0].building.entity.color = "#fff";
-	g.planet.plots[1].building.entity.color = "#ff4";
-
-	// START UP
-	// TODO: add this to states
-
-	g.stage.draw();
 
 
 	g.incrementer.addCurrencies([
@@ -134,10 +127,77 @@ RocketBoots.ready(function(){
 		//g.stage.camera.pos.theta -= onePlotAngle/100;
 		//g.stage.camera.rotation += onePlotAngle/100;
 		g.stage.draw();
-	}, LOOP_DELAY)
+	}, LOOP_DELAY);
 
-	g.loop.start();
 
+	g.state.addStates({
+		"preload": {
+			start: function(){
+				var imageMap = {};
+				_.forEach(data.floors, function(floor, key){
+					imageMap[key] = "floors/" + floor.imageFileName + ".png";
+				});
+				g.images.load(imageMap, function(){
+
+					// g.sounds.loadSounds(["coin1","coin2","dud1","dud2","save1","transfer1","upgrade1","shock1"]);
+
+					g.setupEvents();
+
+					// Automatically move on...
+					if (g.loadGame()) {
+						g.state.transition("game");
+					} else {
+						g.state.transition("menu");
+					}
+
+				});
+			}
+		},
+		"menu": {
+			start: function () {
+				g.createRandomBuildings(); // TODO: remove this later
+				g.state.transition("game"); // go straight to the game; TODO: change this later
+			}
+		},
+		"game": {
+			start: function () {
+				console.log("----------------===== Starting Game =====----------------");
+				//g.stage.draw();
+				g.loop.start();
+			}, end: function () {
+				g.loop.stop();
+			}
+		}
+	});
+
+
+	// Add random buildings just for testing
+	g.createRandomBuildings = function () {
+		g.planet.plots.slice(0,6).forEach(function(plot){
+			var zoneType = g.dice.selectRandom(["R","C","I"]);
+			var building = plot.buildBuilding({name: "Random Building", zoneType: zoneType});
+			if (building) {
+				var floorOptions = {
+					floorKey: (zoneType + "-1"),
+					imageBank: g.images
+				};
+				plot.buildFloor(floorOptions);
+				if (Math.random() > 0.5) { plot.buildFloor(floorOptions); }
+				if (Math.random() > 0.5) { plot.buildFloor(floorOptions); }
+				if (Math.random() > 0.5) { plot.buildFloor(floorOptions); }
+				if (Math.random() > 0.5) { plot.buildFloor(floorOptions); }
+				if (Math.random() > 0.5) { plot.buildFloor(floorOptions); }
+			}
+		});
+		g.planet.plots[0].building.entity.color = "#fff";
+		g.planet.plots[1].building.entity.color = "#ff4";
+	};
+
+
+	g.loadGame = function () {
+		// TODO
+		return false;
+	};
 
 
 	g.setupEvents = function () {
@@ -196,7 +256,8 @@ RocketBoots.ready(function(){
 	};
 
 
-	g.setupEvents();
+	// Start it up
+	g.state.transition("preload");
 
 
 //==================================================================== OLD GAME
